@@ -250,8 +250,10 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 outputs = outputs[:, -self.args.pred_len:, f_dim:]
                 batch_y = batch_y[:, -self.args.pred_len:,
                                   f_dim:].to(self.device)
-                outputs = outputs.detach().cpu().numpy()
-                batch_y = batch_y.detach().cpu().numpy()
+                mean_X, std_X = self.Data.scaler.mean_, self.Data.scaler.scale_
+
+                outputs = outputs.detach().cpu().numpy()*std_X+mean_X
+                batch_y = batch_y.detach().cpu().numpy()*std_X+mean_X
 
                 pred = outputs
                 true = batch_y
@@ -264,7 +266,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                         (input[0, :, -1], true[0, :, -1]), axis=0)
                     pd = np.concatenate(
                         (input[0, :, -1], pred[0, :, -1]), axis=0)
-                    visual(gt, pd, os.path.join(folder_path, str(i) + '.pdf'))
+                    visual(gt, pd, os.path.join(folder_path, str(i) + '.jpg'))
 
         preds = np.array(preds)
         trues = np.array(trues)
